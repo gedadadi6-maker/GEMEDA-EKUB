@@ -1,0 +1,8 @@
+{
+  "name": "Remix Ukubii",
+  "description": "Ukubii — Telegram Mini App \u0026 Online Shop for lottery orders 1-5000 with reservation countdown, payment receipt upload, and admin management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

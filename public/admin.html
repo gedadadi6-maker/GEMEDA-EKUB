@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="om">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ukubii — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-dark: #1e293b;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .admin-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Top Bar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: var(--card-dark);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn:hover { background: #334155; }
+    .btn-primary { background: var(--primary); border-color: var(--primary); }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-success { background: var(--success); border-color: var(--success); color: white; }
+    .btn-danger { background: var(--danger); border-color: var(--danger); color: white; }
+
+    /* Navigation Tabs */
+    .admin-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    }
+
+    .nav-link {
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-muted);
+      border: none;
+      background: none;
+      font-size: 14px;
+    }
+
+    .nav-link.active {
+      background: var(--card-dark);
+      color: var(--primary);
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-dark);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .stat-card.pending .stat-value { color: var(--warning); }
+    .stat-card.confirmed .stat-value { color: var(--success); }
+    .stat-card.rejected .stat-value { color: var(--danger); }
+    .stat-card.available .stat-value { color: #38bdf8; }
+
+    /* Filter & Search Bar */
+    .controls-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: var(--card-dark);
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .search-box {
+      display: flex;
+      gap: 8px;
+      min-width: 260px;
+    }
+
+    .search-box input {
+      flex: 1;
+      background: var(--card-dark);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    /* Orders Table */
+    .table-card {
+      background: var(--card-dark);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      overflow-x: auto;
+      margin-bottom: 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--card-border);
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-badge.reserved { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .status-badge.pending { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+    .status-badge.confirmed { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .status-badge.rejected { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .status-badge.expired { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
+
+    /* Action buttons in row */
+    .action-group {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-table {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Settings Panel */
+    .settings-panel {
+      background: var(--card-dark);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 700px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .form-group input, .form-group textarea {
+      width: 100%;
+      background: var(--bg-dark);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: var(--font-family);
+      outline: none;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+      border-color: var(--primary);
+    }
+
+    /* Modals */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+    }
+
+    .modal.hidden { display: none; }
+
+    .modal-content {
+      background: var(--card-dark);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 24px;
+      width: 100%;
+      max-width: 550px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 10px;
+    }
+
+    .receipt-preview-img {
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Header -->
+    <header>
+      <div class="header-title">
+        <span>🛡️</span>
+        <div>
+          <h1>UKUBII ADMIN</h1>
+          <p style="font-size:12px; color:var(--text-muted);">Bulchiinsa Order & Kaffaltii</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn" onclick="openKeyModal()">🔑 Key: <span id="keyStatus">Set</span></button>
+        <button class="btn" onclick="loadDashboard()">🔄 Refresh</button>
+        <a href="/" class="btn btn-primary" target="_blank">↗ Shop Ban</a>
+      </div>
+    </header>
+
+    <!-- Nav Tabs -->
+    <div class="admin-nav">
+      <button class="nav-link active" onclick="switchView('ordersView')">📦 Orderwwan & Stats</button>
+      <button class="nav-link" onclick="switchView('settingsView')">⚙️ Settings</button>
+    </div>
+
+    <!-- VIEW 1: ORDERS & STATS -->
+    <div id="ordersView">
+      <!-- Statistics -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Waliigala Orders</div>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-card pending">
+          <div class="stat-label">Pending (Eegaa jiru)</div>
+          <div class="stat-value" id="statPending">0</div>
+        </div>
+        <div class="stat-card confirmed">
+          <div class="stat-label">Confirmed (Mirkanaa'e)</div>
+          <div class="stat-value" id="statConfirmed">0</div>
+        </div>
+        <div class="stat-card rejected">
+          <div class="stat-label">Rejected</div>
+          <div class="stat-value" id="statRejected">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Reserved</div>
+          <div class="stat-value" id="statReserved">0</div>
+        </div>
+        <div class="stat-card available">
+          <div class="stat-label">Lakkoofsa Hafan</div>
+          <div class="stat-value" id="statAvailable">0</div>
+        </div>
+      </div>
+
+      <!-- Filters & Search -->
+      <div class="controls-row">
+        <div class="filter-group">
+          <button class="filter-btn active" onclick="setFilter('all', this)">Hunda</button>
+          <button class="filter-btn" onclick="setFilter('pending', this)">Pending</button>
+          <button class="filter-btn" onclick="setFilter('confirmed', this)">Confirmed</button>
+          <button class="filter-btn" onclick="setFilter('rejected', this)">Rejected</button>
+          <button class="filter-btn" onclick="setFilter('reserved', this)">Reserved</button>
+          <button class="filter-btn" onclick="setFilter('expired', this)">Expired</button>
+        </div>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Order #, Maqaa, Bilbila, Telegram..." onkeyup="if(event.key==='Enter') loadOrders()">
+          <button class="btn" onclick="loadOrders()">Barbaadi</button>
+        </div>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Maqaa Guutuu</th>
+              <th>Bilbila</th>
+              <th>Telegram</th>
+              <th>Gatii</th>
+              <th>Status</th>
+              <th>Guyyaa</th>
+              <th>Tarkaanfii (Actions)</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTableBody">
+            <tr><td colspan="8" style="text-align:center; padding:30px;">Orders fe'aa jira...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- VIEW 2: SETTINGS -->
+    <div id="settingsView" style="display:none;">
+      <div class="settings-panel">
+        <h2 style="font-size:18px; margin-bottom:16px;">Gabaasa & Qindaa'ina Shop</h2>
+        <form onsubmit="saveSettings(event)">
+          <div class="form-group">
+            <label>Maqaa Product (Product Name)</label>
+            <input type="text" id="settingProductName" required>
+          </div>
+          <div class="form-group">
+            <label>Suuraa Product (Image URL)</label>
+            <input type="text" id="settingProductImage" required>
+          </div>
+          <div class="form-group">
+            <label>Ibsa (Description)</label>
+            <textarea id="settingDescription" rows="3" required></textarea>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label>Gatii Ticket (Birr)</label>
+              <input type="number" id="settingPrice" required min="1">
+            </div>
+            <div class="form-group">
+              <label>Waliigala Orders (Total Orders)</label>
+              <input type="number" id="settingTotalOrders" required min="1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Guyyaa Xumuramaa (End Date)</label>
+            <input type="date" id="settingEndDate" required>
+          </div>
+          <div class="form-group">
+            <label>Maqaa Admin (Admin Name)</label>
+            <input type="text" id="settingAdminName" required>
+          </div>
+          <div class="form-group">
+            <label>Odeeffannoo Bank / Kaffaltii (Payment Account Details)</label>
+            <textarea id="settingAdminAccount" rows="4" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="padding:12px 24px; font-size:15px;">💾 Settings Save Godhi</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Modal -->
+  <div id="keyModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Admin Key Galchi</h3>
+        <button class="btn" onclick="closeKeyModal()">✕</button>
+      </div>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">
+        Admin endpoint-oota fayyadamuuf `ADMIN_KEY` sirrii galchi.
+      </p>
+      <input type="password" id="adminKeyInput" style="width:100%; padding:10px; border-radius:6px; background:var(--bg-dark); color:white; border:1px solid var(--card-border); margin-bottom:16px;" placeholder="Admin secret key...">
+      <button class="btn btn-primary" style="width:100%;" onclick="saveAdminKey()">Galchi & Qabadhu</button>
+    </div>
+  </div>
+
+  <!-- Receipt Modal -->
+  <div id="receiptModal" class="modal hidden">
+    <div class="modal-content" style="max-width:650px;">
+      <div class="modal-header">
+        <h3 id="receiptModalTitle">Nagahee Kaffaltii</h3>
+        <button class="btn" onclick="closeReceiptModal()">✕</button>
+      </div>
+      <div id="receiptModalBody" style="text-align:center; padding:10px 0;"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+        <a id="receiptDownloadLink" href="#" target="_blank" class="btn btn-primary">Download / View</a>
+        <button class="btn" onclick="closeReceiptModal()">Cufi</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentFilter = 'all';
+    let adminKey = sessionStorage.getItem('ukubii_admin_key') || 'ukubii_admin_sec_9f82d7a3e4c1b5062a9841f3e7';
+
+    function getAdminHeaders() {
+      return {
+        'Content-Type': 'application/json',
+        'X-Admin-Key': adminKey
+      };
+    }
+
+    function openKeyModal() {
+      document.getElementById('adminKeyInput').value = adminKey;
+      document.getElementById('keyModal').classList.remove('hidden');
+    }
+
+    function closeKeyModal() {
+      document.getElementById('keyModal').classList.add('hidden');
+    }
+
+    function saveAdminKey() {
+      const val = document.getElementById('adminKeyInput').value.trim();
+      if (val) {
+        adminKey = val;
+        sessionStorage.setItem('ukubii_admin_key', val);
+        document.getElementById('keyStatus').textContent = 'Active';
+        closeKeyModal();
+        loadDashboard();
+      }
+    }
+
+    function switchView(viewId) {
+      document.getElementById('ordersView').style.display = viewId === 'ordersView' ? 'block' : 'none';
+      document.getElementById('settingsView').style.display = viewId === 'settingsView' ? 'block' : 'none';
+      document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (viewId === 'settingsView') {
+        loadSettings();
+      }
+    }
+
+    function setFilter(status, btn) {
+      currentFilter = status;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadOrders();
+    }
+
+    async function loadDashboard() {
+      await loadStats();
+      await loadOrders();
+    }
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/admin/stats', { headers: getAdminHeaders() });
+        if (res.status === 401) {
+          openKeyModal();
+          return;
+        }
+        const data = await res.json();
+        const s = data.data || {};
+        document.getElementById('statTotal').textContent = s.total_orders || 0;
+        document.getElementById('statPending').textContent = s.pending || 0;
+        document.getElementById('statConfirmed').textContent = s.confirmed || 0;
+        document.getElementById('statRejected').textContent = s.rejected || 0;
+        document.getElementById('statReserved').textContent = s.reserved || 0;
+        document.getElementById('statAvailable').textContent = s.available_numbers || 0;
+      } catch (e) {
+        console.error('Stats error:', e);
+      }
+    }
+
+    async function loadOrders() {
+      const tbody = document.getElementById('ordersTableBody');
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px;">Orders fe\'aa jira...</td></tr>';
+
+      const search = document.getElementById('searchInput').value.trim();
+      const params = new URLSearchParams();
+      if (currentFilter !== 'all') params.append('status', currentFilter);
+      if (search) params.append('search', search);
+
+      try {
+        const res = await fetch(`/api/admin/orders?${params.toString()}`, { headers: getAdminHeaders() });
+        if (res.status === 401) {
+          openKeyModal();
+          return;
+        }
+        const data = await res.json();
+        const orders = data.data || [];
+
+        if (orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:30px; color:var(--text-muted);">Order homaa hin argamne.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = orders.map(o => {
+          const isPending = o.status === 'pending';
+          const receiptBtn = o.receipt_filename
+            ? `<button class="btn-table" style="background:#475569; color:#fff;" onclick="viewReceipt('${o.receipt_filename}', '${o.order_number}')">🧾 Nagahee</button>`
+            : '<span style="color:var(--text-muted); font-size:11px;">Hin qabu</span>';
+
+          const actions = isPending ? `
+            <button class="btn-table btn-success" onclick="confirmOrder(${o.id}, ${o.order_number})">Confirm</button>
+            <button class="btn-table btn-danger" onclick="rejectOrder(${o.id}, ${o.order_number})">Reject</button>
+          ` : '-';
+
+          return `
+            <tr>
+              <td><b>#${o.order_number}</b></td>
+              <td>${o.full_name || 'N/A'}</td>
+              <td>${o.phone || 'N/A'}</td>
+              <td>${o.telegram_username ? '@' + o.telegram_username : o.telegram_id}</td>
+              <td><b>${Number(o.amount).toLocaleString()} Birr</b></td>
+              <td><span class="status-badge ${o.status}">${o.status}</span></td>
+              <td>${new Date(o.created_at).toLocaleDateString()}</td>
+              <td>
+                <div class="action-group">
+                  ${receiptBtn}
+                  ${actions}
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="8" style="color:var(--danger); text-align:center; padding:20px;">Dogoggora: ${e.message}</td></tr>`;
+      }
+    }
+
+    async function confirmOrder(id, orderNumber) {
+      if (!confirm(`Order #${orderNumber} mirkaneessuu (CONFIRM) barbaaddaa?`)) return;
+
+      try {
+        const res = await fetch(`/api/admin/orders/${id}/confirm`, {
+          method: 'POST',
+          headers: getAdminHeaders()
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Confirm hin milkoofne.');
+        alert(`Order #${orderNumber} milkaa'inaan CONFIRMED ta'eera!`);
+        loadDashboard();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function rejectOrder(id, orderNumber) {
+      const reason = prompt(`Order #${orderNumber} haquuf (REJECT) sababa galchi (optional):`);
+      if (reason === null) return;
+
+      try {
+        const res = await fetch(`/api/admin/orders/${id}/reject`, {
+          method: 'POST',
+          headers: getAdminHeaders(),
+          body: JSON.stringify({ reason })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Reject hin milkoofne.');
+        alert(`Order #${orderNumber} REJECTED ta'eera!`);
+        loadDashboard();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function viewReceipt(filename, orderNumber) {
+      document.getElementById('receiptModalTitle').textContent = `Nagahee Order #${orderNumber}`;
+      const body = document.getElementById('receiptModalBody');
+      const downloadLink = document.getElementById('receiptDownloadLink');
+
+      const url = `/api/admin/receipts/${filename}`;
+
+      // Fetch blob with header
+      try {
+        body.innerHTML = 'Nagahee fe\'aa jira...';
+        document.getElementById('receiptModal').classList.remove('hidden');
+
+        const res = await fetch(url, { headers: { 'X-Admin-Key': adminKey } });
+        if (!res.ok) throw new Error('Nagahee argachuu hin dandeenye.');
+
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+
+        downloadLink.href = objectUrl;
+        downloadLink.download = filename;
+
+        if (blob.type.startsWith('image/')) {
+          body.innerHTML = `<img src="${objectUrl}" class="receipt-preview-img" alt="Receipt">`;
+        } else if (blob.type === 'application/pdf') {
+          body.innerHTML = `<iframe src="${objectUrl}" style="width:100%; height:400px; border:none;"></iframe>`;
+        } else {
+          body.innerHTML = `<p>Gosa file kana preview hin godhamu. Download godhaa.</p>`;
+        }
+      } catch (e) {
+        body.innerHTML = `<p style="color:var(--danger);">${e.message}</p>`;
+      }
+    }
+
+    function closeReceiptModal() {
+      document.getElementById('receiptModal').classList.add('hidden');
+    }
+
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/shop');
+        const s = await res.json();
+        document.getElementById('settingProductName').value = s.product_name || '';
+        document.getElementById('settingProductImage').value = s.product_image || '';
+        document.getElementById('settingDescription').value = s.description || '';
+        document.getElementById('settingPrice').value = s.ticket_price || 3500;
+        document.getElementById('settingTotalOrders').value = s.total_orders || 5000;
+        document.getElementById('settingEndDate').value = s.end_date || '';
+        document.getElementById('settingAdminName').value = s.admin_name || '';
+        document.getElementById('settingAdminAccount').value = s.admin_account || '';
+      } catch (e) {
+        console.error('Settings load error:', e);
+      }
+    }
+
+    async function saveSettings(e) {
+      e.preventDefault();
+      const payload = {
+        product_name: document.getElementById('settingProductName').value.trim(),
+        product_image: document.getElementById('settingProductImage').value.trim(),
+        description: document.getElementById('settingDescription').value.trim(),
+        ticket_price: parseInt(document.getElementById('settingPrice').value, 10),
+        total_orders: parseInt(document.getElementById('settingTotalOrders').value, 10),
+        end_date: document.getElementById('settingEndDate').value,
+        admin_name: document.getElementById('settingAdminName').value.trim(),
+        admin_account: document.getElementById('settingAdminAccount').value.trim()
+      };
+
+      try {
+        const res = await fetch('/api/admin/settings', {
+          method: 'PUT',
+          headers: getAdminHeaders(),
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Settings update hin taane.');
+        alert('Settings milkaa\'inaan save ta\'eera!');
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDashboard();
+    });
+  </script>
+</body>
+</html>

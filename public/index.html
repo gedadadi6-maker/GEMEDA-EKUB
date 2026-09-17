@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="om">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Ukubii — Telegram Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app" class="app-container">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">🛍️</div>
+        <div>
+          <h1 class="brand-title">UKUBII</h1>
+          <p class="brand-subtitle">Telegram Mini App & Online Shop</p>
+        </div>
+      </div>
+      <div class="user-chip" id="userChip">
+        <span class="user-dot"></span>
+        <span id="userNameDisplay">Telegram User</span>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" id="tabShopBtn" onclick="switchTab('shop')">
+        <span>🚗 Shop & Equb</span>
+      </button>
+      <button class="tab-btn" id="tabOrdersBtn" onclick="switchTab('orders')">
+        <span>📋 Order Koo</span>
+        <span class="badge" id="orderCountBadge" style="display:none;">0</span>
+      </button>
+    </nav>
+
+    <!-- Notification Toast / Banner -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- MAIN TAB: SHOP & ORDER FLOW -->
+    <main id="shopTab" class="tab-content active">
+      <!-- Product Card -->
+      <section class="product-card card">
+        <div class="product-image-wrap">
+          <img id="productImage" src="/assets/gemeda_ev.jpg" alt="Gemeda EV" onerror="this.src='/assets/gemeda_ev.jpg'">
+          <div class="product-badge" id="productBadge">Active Equb</div>
+        </div>
+        <div class="product-info">
+          <h2 id="productTitle" class="product-title">Gemeda EV EQUB</h2>
+          <p id="productDesc" class="product-desc">Car Raffle & Equb tickets. Filadhu, reserve godhi, kaffaltii nagahee upload godhi.</p>
+          <div class="meta-row">
+            <div class="meta-item">
+              <span class="meta-label">Gatii Ticket</span>
+              <span class="meta-value highlight" id="productPrice">3,500 Birr</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Guyyaa Xumuramaa</span>
+              <span class="meta-value" id="productEndDate">2026-10-31</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Lakkoofsa Hafan</span>
+              <span class="meta-value" id="availableSlots">...</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Active Reservation Card (Visible when user has a reservation) -->
+      <section id="reservationBanner" class="reservation-card card hidden">
+        <div class="reservation-header">
+          <div class="res-title-wrap">
+            <span class="pulse-indicator"></span>
+            <h3>Reservation Active</h3>
+          </div>
+          <div class="res-timer" id="timerDisplay">10:00</div>
+        </div>
+        <div class="res-details">
+          <div class="res-number-pill">Order #<span id="resOrderNumber">0000</span></div>
+          <p class="res-sub">Gatii: <b id="resPriceDisplay">3,500 Birr</b>. Yeroon xumuramuu dura formii guuti nagahee upload godhi!</p>
+        </div>
+      </section>
+
+      <!-- Step 1: Order Number Selection Grid -->
+      <section class="selection-section card">
+        <div class="section-title-wrap">
+          <div class="step-circle">1</div>
+          <div>
+            <h3 class="section-title">Order Number Filadhu</h3>
+            <p class="section-subtitle">Lakkoofsa banaa ta'e (1 - <span id="totalOrdersLimit">5000</span>) keessaa tokko cuqaasi</p>
+          </div>
+        </div>
+
+        <div class="filter-controls">
+          <div class="search-input-wrap">
+            <input type="number" id="searchNumberInput" placeholder="Lakkoofsa barbaadi (fkn 777)..." min="1">
+            <button class="btn-search" onclick="jumpToNumber()">Ilaali</button>
+          </div>
+          <div class="range-selector">
+            <label for="rangeSelect">Kutaa / Range:</label>
+            <select id="rangeSelect" onchange="changeRange(this.value)">
+              <option value="1-100">1 - 100</option>
+              <option value="101-200">101 - 200</option>
+              <option value="201-300">201 - 300</option>
+              <option value="301-400">301 - 400</option>
+              <option value="401-500">401 - 500</option>
+              <option value="501-600">501 - 600</option>
+              <option value="601-700">601 - 700</option>
+              <option value="701-800">701 - 800</option>
+              <option value="801-900">801 - 900</option>
+              <option value="901-1000">901 - 1000</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="legend-row">
+          <span class="legend-item"><span class="legend-color available"></span> Banaa</span>
+          <span class="legend-item"><span class="legend-color reserved"></span> Reserved</span>
+          <span class="legend-item"><span class="legend-color pending"></span> Pending</span>
+          <span class="legend-item"><span class="legend-color confirmed"></span> Confirmed</span>
+        </div>
+
+        <!-- Numbers Grid Container -->
+        <div id="numbersGrid" class="numbers-grid">
+          <div class="loading-spinner">Lakkoofsota fe'aa jira...</div>
+        </div>
+      </section>
+
+      <!-- Step 2: Payment & Order Submission Form -->
+      <section id="orderFormSection" class="form-section card disabled">
+        <div class="section-title-wrap">
+          <div class="step-circle">2</div>
+          <div>
+            <h3 class="section-title">Kaffaltii & Nagahee Galchi</h3>
+            <p class="section-subtitle">Odeeffannoo kee guutiitii nagahee kaffaltii upload godhi</p>
+          </div>
+        </div>
+
+        <!-- Bank Payment Instructions -->
+        <div class="payment-box">
+          <div class="payment-box-header">
+            <span>🏦 Odeeffannoo Kaffaltii (Bank & Telebirr)</span>
+          </div>
+          <div class="payment-box-body" id="adminAccountDetails">
+            CBE (Commercial Bank of Ethiopia): 1000123456789 (Gemeda EV)<br>
+            Telebirr: 0911223344 (Gemeda EV)<br>
+            Gatii: <b>3,500 Birr</b>
+          </div>
+        </div>
+
+        <form id="orderSubmitForm" onsubmit="handleOrderSubmit(event)">
+          <div class="form-group">
+            <label for="fullNameInput">Maqaa Guutuu *</label>
+            <input type="text" id="fullNameInput" required placeholder="Fkn: Gammadaa Daadhii" minlength="2" maxlength="100">
+          </div>
+
+          <div class="form-group">
+            <label for="phoneInput">Lakkoofsa Bilbilaa *</label>
+            <input type="tel" id="phoneInput" required placeholder="Fkn: 0912345678" minlength="7" maxlength="30">
+          </div>
+
+          <div class="form-group">
+            <label for="receiptFileInput">Nagahee Kaffaltii (Receipt) *</label>
+            <div class="file-upload-wrap">
+              <input type="file" id="receiptFileInput" accept="image/jpeg,image/png,image/webp,application/pdf" required onchange="handleReceiptSelected(this)">
+              <div class="upload-dummy" id="uploadDummy">
+                <span class="upload-icon">📄</span>
+                <span id="uploadLabel">Nagahee filadhu (JPG, PNG, WEBP, PDF - Max 5MB)</span>
+              </div>
+            </div>
+            <div id="filePreviewWrap" class="file-preview-wrap hidden">
+              <span id="previewFileName"></span>
+              <button type="button" class="btn-clear-file" onclick="clearSelectedFile()">✕</button>
+            </div>
+          </div>
+
+          <button type="submit" id="submitOrderBtn" class="btn-primary" disabled>
+            <span id="btnSubmitText">ORDER SUBMIT GODHI</span>
+          </button>
+        </form>
+      </section>
+
+      <!-- Step 3: Success Modal / Card -->
+      <section id="successCard" class="success-card card hidden">
+        <div class="success-icon">✅</div>
+        <h2 class="success-title">Order Kee Milkaa'inaan Galmaa'eera!</h2>
+        <div class="success-number-pill">Order #<span id="successOrderNumber"></span></div>
+        <div class="success-badge">STATUS: PENDING</div>
+        <p class="success-message">
+          Adminiin kaffaltii kee nagahee irraa erga mirkaneesse booda status kee <b>CONFIRMED</b> ta'a.
+        </p>
+        <button class="btn-secondary" onclick="switchTab('orders')">Order Koo Ilaali</button>
+      </section>
+    </main>
+
+    <!-- SECOND TAB: MY ORDERS -->
+    <section id="ordersTab" class="tab-content">
+      <div class="card my-orders-card">
+        <div class="my-orders-header">
+          <h3>Orderwwan Koo</h3>
+          <button class="btn-sm" onclick="loadMyOrders()">🔄 Haaromsi</button>
+        </div>
+        <div id="myOrdersList" class="my-orders-list">
+          <div class="loading-spinner">Orders fe'aa jira...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom Footer -->
+    <footer class="app-footer">
+      <p>Ukubii © 2026 — Nageenya qabeessa fi Saffisaa</p>
+      <a href="/admin.html" class="admin-link">Admin Panel</a>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
